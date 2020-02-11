@@ -1,3 +1,4 @@
+coclass jcolor
 clear''
 require'viewmat'
 coinsert'jgl2 jviewmat'
@@ -19,40 +20,38 @@ rgbw_close=: verb define
 wd'psel rgbw;pclose;timer 0'
 )
 
-rgbw_pickr_mblup=: 3 : '0 adjust_color'
-rgbw_pickg_mblup=: 3 : '1 adjust_color'
-rgbw_pickb_mblup=: 3 : '2 adjust_color'
+rgbw_pickr_mblup=: monad : '0 adjust_color'
+rgbw_pickg_mblup=: monad : '1 adjust_color'
+rgbw_pickb_mblup=: monad : '2 adjust_color'
 
 color=: 0 0 0
 
-clamp_color=: 3 : 'color=:(3#0)>. color <. 3#255'
-
-NB. tofix: all colors 1 digit gives length 3 string
-hex_color=: [: , [: ": [: {&'0123456789ABCDEF' 16&(#.^:_1)
+hex_color=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF' 16&(#.^:_1)
 
 adjust_color=: adverb define
-update_color_display[color=:(1{".sysdata)(m})clamp_color''
+color=:(3#0)>.((1{".sysdata)(m})color)<.3#255
+update_color_display''
 )
 
 render_child=: verb define
 glclear''[glsel child[wd'psel rgbw'['column child'=. y
-glpaint''[((i.256)&(column})&.|:(256 3 $ color)) viewmatcc (i.256 50);child
+((i.256)&(column})&.|:(256 3$color))viewmatcc(i.256 50);child
+glpaint''
 )
 
 update_color_display=: verb define
 wd'psel rgbw'
-render_child (2;'pickb')[render_child (1;'pickg')[render_child (0;'pickr')
+render_child(2;'pickb')[render_child(1;'pickg')[render_child(0;'pickr')
 glpaint''[glfill (color,255)[glclear''[glsel'showc'
 wd'pn "',c,'"'[wd'clipcopy ',]c=.'#',hex_color color
 )
 
-NB. todo: reset? button? make into application?
 mush=: verb define
 if. IFQT
 do. rgbw_close^:(wdisparent'rgbw')''
     wd rgbw_form
     update_color_display''
-else. echo 'in emacs'
+else. echo 'no qt'
 end.
 )
 
