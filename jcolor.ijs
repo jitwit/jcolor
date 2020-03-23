@@ -24,7 +24,7 @@ rgbw_close=: monad : 'wd''psel rgbw;pclose;'''
 rgbw_pickr_mblup=: monad : '0 adjust_color'
 rgbw_pickg_mblup=: monad : '1 adjust_color'
 rgbw_pickb_mblup=: monad : '2 adjust_color'
-rgbw_showc_mblup=: monad : 'wd ''clipcopy #'',hex_color COLOR'
+rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
 rgbw_rgbc_button=: monad : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
 
 COLOR=: 0 0 0
