@@ -4,16 +4,14 @@ coinsert'jgl2 jviewmat'
 
 rgbw_form=: noun define
 pc rgbw; pn "J-color";
-bin v;
-  cc showc isidraw; set showc wh 180 50;
-  cc rgbc edit;
-    set rgbc wh 180 25;
-    set rgbc alignment center;
-    set rgbc regexpvalidator \d{,3}(\s\d{,3}){2,2};
-  bin h;
-    cc pickr isidraw; set pickr wh 50 256;
-    cc pickg isidraw; set pickg wh 50 256;
-    cc pickb isidraw; set pickb wh 50 256;
+bin h;
+  cc pickr isidraw; set pickr wh 50 256;
+  cc pickg isidraw; set pickg wh 50 256;
+  cc pickb isidraw; set pickb wh 50 256;
+  bin v;
+    cc showc isidraw; set showc wh 180 180;
+    cc rgbc edit; set rgbc wh 180 25; set rgbc alignment center; set rgbc regexpvalidator \d{,3}(\s\d{,3}){2,2};
+    cc copyt combolist; set copyt items rgb hex;
   bin z;
 bin z;
 pshow;
@@ -26,6 +24,12 @@ rgbw_pickg_mblup=: monad : '1 adjust_color'
 rgbw_pickb_mblup=: monad : '2 adjust_color'
 rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
 rgbw_rgbc_button=: monad : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
+rgbw_copyt_select=: monad define
+select. copyt
+case. 'hex' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy #'',": hex_color COLOR'
+case. 'rgb' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
+end. 'ok'
+)
 
 COLOR=: 0 0 0
 
