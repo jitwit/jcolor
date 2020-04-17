@@ -1,0 +1,202 @@
+# -*- mode: org -*-
+
+#+title: J-color
+
+This is a program for a simple color picker. I don't enjoy finding
+colors to use with the standard ones that come up in a quick search
+engine search. This file also serves as some brief notes about using
+J's ~wd~ (window driver) framework for writing qt guis.
+
+* Idea
+
+To pick colors by clicking three strips representing the color in
+RGB. To have a text edit area where numbers may be entered. For
+example, to get something yellowish, you can click somewhat far down
+the red strip and somewhat far down the green strip. Have another area
+that shows the currently selected color. Clicking the output area has
+the effect of copying the RGB value to the clipboard. There's also a
+selectionlist form to ask for a hex string if that's prefereable.
+
+This is like walking along the RGB color space where vertices are
+colors and edges point between colors that share 2/3 RGB values. The
+way colors are displayed in the strips makes displays the range of
+possible colors keeping 2 the same, which I find helpful.
+
+* Imports/Names
+
+In order to avoid cluttering up the namespace, I add a ~coclass~
+declaration. ~jgl2~ (graphics driver) and ~viewmat~ are used for
+drawing.
+
+#+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
+coclass 'jcolor'
+require 'viewmat'
+coinsert'jgl2 jviewmat'
+#+END_SRC
+
+* Parent Form and State
+
+It's best to head over to the [[https://code.jsoftware.com/wiki/Guides/Window_Driver][Window Driver]] guide at jsoftware.com for
+accurate and detailed information.
+
+In jqt, ~wd 'pc id'~ creates a parent form in which child forms may be
+added. As things stand, this includes three ~isidraw~ forms to draw
+RGB color strips, one more to show the output color/copy to
+clipboard. One ~edit~ form to see the rgb value and to edit the
+numbers. Finally a ~combolist~ to select desired output format. 
+
+Here, the parent form is called ~rgbw~ for rgb window. 
+
+Program state is stored in a name ~COLOR~, initially 0 0 0. A handler
+for closing the window is specified with the name ~rgbw_close~.
+
+#+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
+COLOR=: 0 0 0
+
+rgbw_form=: noun define
+pc rgbw; pn "J-color";
+bin h;
+  cc pickr isidraw; set pickr wh 50 256;
+  cc pickg isidraw; set pickg wh 50 256;
+  cc pickb isidraw; set pickb wh 50 256;
+  bin v;
+    cc showc isidraw; set showc wh 180 180;
+    cc rgbc edit; set rgbc wh 180 25; set rgbc alignment center;
+      set rgbc regexpvalidator \d{,3}(\s\d{,3}){2,2};
+    cc copyt combolist; set copyt items rgb hex;
+  bin z;
+bin z;
+pshow;
+)
+
+rgbw_close=: monad : 'wd''psel rgbw;pclose;'''
+#+END_SRC
+
+* Children
+
+The thing to know is that event handlers can be added for children
+forms under the naming scheme ~parentid_childid_eventid~. Here, the
+parent is ~rbgw~ and all even handlers are named
+~rgbw_somechild_someevent~.
+
+** isidraw
+
+Isidraw forms allow one to use ~gl2~ commands or ~viewmat~ to draw to
+areas of the window. The three strips ~pickr~, ~pickg~, and ~pickb~
+will preview the possible colors. Clicking the top of the strip will
+set the color to 0, clicking the bottom will set it to 255.
+
+The output ~isidraw~ is called ~showc~ and clicking it will save the
+color in the clipboard.
+
+The event used is on ~mblup~ (left mouse button up). When this happens
+the location of the mouse up on the strips determines the next
+color. For ~showc~ no location information is needed; by default the
+string of the 3-vector ~COLOR~ is formatted then copied.
+
+#+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
+rgbw_pickr_mblup=: monad : '0 adjust_color'
+rgbw_pickg_mblup=: monad : '1 adjust_color'
+rgbw_pickb_mblup=: monad : '2 adjust_color'
+rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
+
+adjust_color=: adverb define
+COLOR=:(3#0)>.((1{".sysdata)(m})COLOR)<.3#255
+update''
+)
+#+END_SRC
+
+~adjust_color~ grabs location information held in name ~sysdata~. noun
+~m~ is which color to ammend (~}~), 0 for red, 1 for green, 2 for
+blue. 
+
+This value is clamped between 0 and 255 in case the mouse was dragged
+out of bounds. Noteworthy is ~sysdata~ (for ~isidraw~) indicates ~x~
+then ~y~ coordinates, but the height of the strip is all that matters
+here, thus ~1 { ".sysdata~ does the trick.
+
+*** isidrawing
+
+~update~ ensures parent window is selected ~psel rgbw~. For each child
+use values of ~COLOR~ preview possibilities with ~render_child~.
+
+For example, take green. The main work is done with
+~((i.256)&(1})&.|:(256 3$COLOR))viewmatcc(i.256 50);'pickg'~. 
+
+The color palette used by ~viewmatcc~ is constant ~COLOR~ with 1st row
+(green) ammended to with values 0 to 255. The 256 by 50 matrix that
+gets drawn can then be (~i.256 50~) with the appropriate rgb color
+going at each row.
+
+#+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
+update=: verb define
+wd'psel rgbw'
+render_child(2;'pickb')[render_child(1;'pickg')[render_child(0;'pickr')
+glpaint''[glfill (COLOR,255)[glclear''[glsel'showc'
+wd'set rgbc text "',(":COLOR),'"'
+)
+
+render_child=: verb define
+glclear''[glsel child[wd'psel rgbw'['column child'=. y
+((i.256)&(column})&.|:(256 3$COLOR))viewmatcc(i.256 50);child
+glpaint''
+)
+#+END_SRC
+
+** edit
+
+An edit area shows the current rgb value for ~COLOR~. It has a
+regexpvaildator which on one hand feels like overkill, but on the
+other reduces the frequency of erros when reading the color (~". get
+rgbc text''~). 
+
+The event here is button which fires when ~return~ is pressed and
+updates ~COLOR~ to the new value. All drawings subsequently updated.
+
+#+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
+rgbw_rgbc_button=: monad : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
+#+END_SRC
+
+** combolist
+
+Combo list makes it possible to change output format to hex. The event
+is ~select~.
+
+It works by modifying the definition of the event handler for
+~showc_mblup~.
+
+~hex~ works by antibasing (~#.^:_1~) in base 16, selecting into string
+~01234567890ABCDEF~, padding with ~0~ (in case of very dark colors to
+ensure 6 characters in output), taking last two columns, then finally
+raveling.
+
+#+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
+rgbw_copyt_select=: monad define
+select. copyt
+case. 'hex' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy #'',": hex COLOR'
+case. 'rgb' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
+end. 'ok'
+)
+
+hex=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF'16&(#.^:_1)
+#+END_SRC
+
+* main
+
+Here nicknamed ~mush~, which refuses run unless inside jqt (for ~wd~
+and to type in emacs error-free). Kills any parent windows named
+~rgbw~ for development ease then renders initial black ~COLOR~.
+
+#+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
+mush=: verb define
+if. IFQT do. update[wd rgbw_form[rgbw_close^:(wdisparent'rgbw')''
+else. echo 'no qt' end.
+)
+
+mush''
+#+END_SRC
+
+* todo
+
+Polish up to put in jqt program menu jqt and make distributable as an
+addon.
