@@ -22,6 +22,9 @@ colors and edges point between colors that share 2/3 RGB values. The
 way colors are displayed in the strips makes displays the range of
 possible colors keeping 2 the same, which I find helpful.
 
+#+caption: J-color
+[[file:images/J-color.png][J-color]]
+
 * Imports/Names
 
 In order to avoid cluttering up the namespace, I add a ~coclass~
