@@ -23,7 +23,7 @@ way colors are displayed in the strips makes displays the range of
 possible colors keeping 2 the same, which I find helpful.
 
 #+caption: J-color
-[[file:images/J-color.png][J-color]]
+[[file:images/J-color.png]]
 
 * Imports/Names
 
