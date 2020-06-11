@@ -11,8 +11,7 @@ see https://github.com/jitwit/jcolor
 VERSION=: '0.0.1'
 
 DEPENDS=: 0 : 0
-graphics/gl2
-graphics/viewmat
+viewmat
 )
 
 FILES=: 0 : 0
