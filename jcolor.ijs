@@ -6,7 +6,7 @@ COLOR=: 0 0 0
 HISTORY=: ,:0 0 0
 HISTSIZE=: 10
 
-rgbw_form=: noun define
+rgbw_form=: 0 : 0
 pc rgbw; pn "J-color";
 bin h;
   cc pickr isidraw; set pickr wh 50 256;
@@ -23,12 +23,15 @@ bin z;
 pshow;
 )
 
-rgbw_close=: monad : 'wd''psel rgbw;pclose;'''
+rgbw_close=: 3 : 0
+wd'psel rgbw;pclose;'
+wd 'clipcopy ',": COLOR
+)
 
-rgbw_pickr_mblup=: monad : '0 adjust_color'
-rgbw_pickg_mblup=: monad : '1 adjust_color'
-rgbw_pickb_mblup=: monad : '2 adjust_color'
-rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
+rgbw_pickr_mblup=: 3 : '0 adjust_color'
+rgbw_pickg_mblup=: 3 : '1 adjust_color'
+rgbw_pickb_mblup=: 3 : '2 adjust_color'
+rgbw_showc_mblup=: 3 : 'wd ''clipcopy '',": COLOR'
 
 record_hist=: 3 : 0
 HISTORY=: ~. (<./HISTSIZE,>:#HISTORY) {. COLOR , HISTORY
@@ -37,41 +40,40 @@ wd 'set histt items',,/(' ','"'&,@,&'"'@":)"1 HISTORY
 
 adjust_color=: 1 : 0
 COLOR=:(3#0)>.((1{".sysdata)(m})COLOR)<.3#255
-record_hist''
 update''
 )
 
-update=: verb define
+update=: 3 : 0
+record_hist''
 wd'psel rgbw'
 render_child(2;'pickb')[render_child(1;'pickg')[render_child(0;'pickr')
 glpaint''[glfill (COLOR,255)[glclear''[glsel'showc'
 wd'set rgbc text "',(":COLOR),'"'
 )
 
-render_child=: verb define
+render_child=: 3 : 0
 glclear''[glsel child[wd'psel rgbw'['column child'=. y
 ((i.256)&(column})&.|:(256 3$COLOR))viewmatcc(i.256 50);child
 glpaint''
 )
 
-rgbw_rgbc_button=: monad : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
+rgbw_rgbc_button=: 3 : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
 
-rgbw_copyt_select=: monad define
+rgbw_copyt_select=: 3 : 0
 select. copyt
-case. 'hex' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy #'',": hex COLOR'
-case. 'rgb' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
+case. 'hex' do. rgbw_showc_mblup=: 3 : 'wd ''clipcopy #'',": hex COLOR'
+case. 'rgb' do. rgbw_showc_mblup=: 3 : 'wd ''clipcopy '',": COLOR'
 end. 'ok'
 )
 
-rgbw_histt_select=: monad define
+rgbw_histt_select=: 3 : 0
 COLOR=: ". histt
-record_hist''
 update''
 )
 
 hex=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF'16&(#.^:_1)
 
-courir=: verb define
+courir=: 3 : 0
 if. IFQT do. update[wd rgbw_form[rgbw_close^:(wdisparent'rgbw')''
 else. echo 'needs qt' end.
 )
