@@ -218,10 +218,6 @@ else. echo 'needs qt' end.
 courir''
 #+END_SRC
 
-* todo
-
-Polish up to put in jqt program menu jqt and make distributable as an
-addon.
 
 * addon
 
@@ -240,3 +236,14 @@ these packages is laid out in the [[file:manifest.ijs][manifest]] wherein we spe
 
 Having defined run.ijs, I am able to type ~[f9]~ in jqt to start
 things, which is fun.
+
+** Coda
+
+I have managed to successfuly download it through jqt, add it to the
+launch pad and run it! I should still figure out how to get it not to
+complain about missing gl2 or something
+
+#+BEGIN_SRC j :session :exports code
+install'github:jitwit/jcolor'
+load'jitwit/jcolor' NB. voilà!
+#+END_SRC

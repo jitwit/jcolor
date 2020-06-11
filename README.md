@@ -170,11 +170,6 @@ courir''
 ```
 
 
-# todo
-
-Polish up to put in jqt program menu jqt and make distributable as an addon.
-
-
 # addon
 
 I'll definitely forget these details. OK, so J distributes packages as addons. These are mostly managed through `pacman`. The structure of these packages is laid out in the [manifest](manifest.ijs) wherein we specify:
@@ -188,3 +183,13 @@ I'll definitely forget these details. OK, so J distributes packages as addons. T
 -   **FOLDER** Can be an existing one or is based on github user. I avoided indulging in too much hubris by naming this something generic and scoped it to me.
 
 Having defined run.ijs, I am able to type `[f9]` in jqt to start things, which is fun.
+
+
+## Coda
+
+I have managed to successfuly download it through jqt, add it to the launch pad and run it! I should still figure out how to get it not to complain about missing gl2 or something
+
+```j
+install'github:jitwit/jcolor'
+load'jitwit/jcolor' NB. voilà!
+```
