@@ -1,4 +1,7 @@
 #+title: J-color
+#+HTML_HEAD: <link rel="icon" type="image/png" href="../images/icon.png" />
+#+OPTIONS: author:nil num:nil toc:nil
+#+HTML_HEAD: <style type="text/css"> @import url("../format/css.css"); </style>
 
 This is a program for a simple color picker. This file also serves as
 some brief notes about using J's ~wd~ (window driver) for writing qt
@@ -53,6 +56,8 @@ Program state is stored in a global variable ~COLOR~, initially $0 0
 
 #+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
 COLOR=: 0 0 0
+HISTORY=: ,:0 0 0
+HISTSIZE=: 10
 
 rgbw_form=: noun define
 pc rgbw; pn "J-color";
@@ -72,6 +77,8 @@ pshow;
 
 rgbw_close=: monad : 'wd''psel rgbw;pclose;'''
 #+END_SRC
+
+#+RESULTS:
 
 * Children
 
@@ -102,6 +109,7 @@ rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
 
 adjust_color=: adverb define
 COLOR=:(3#0)>.((1{".sysdata)(m})COLOR)<.3#255
+HISTORY=: HISTSIZE {. COLOR , HISTORY
 update''
 )
 #+END_SRC

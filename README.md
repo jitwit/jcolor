@@ -1,18 +1,5 @@
-- [Idea](#orgb0a2318)
-- [Imports/Names](#org011bf9c)
-- [Parent Form and State](#org695fdb9)
-- [Children](#org9542a32)
-  - [isidraw](#orgfadf7ba)
-    - [isidrawing](#org111c736)
-  - [edit](#orgcb3cc97)
-  - [combolist](#orgaa07f0c)
-- [main](#org8c88d71)
-- [todo](#orgb22fbf8)
-
 This is a program for a simple color picker. This file also serves as some brief notes about using J's `wd` (window driver) for writing qt guis.
 
-
-<a id="orgb0a2318"></a>
 
 # Idea
 
@@ -22,8 +9,6 @@ This is like walking along the RGB color space where vertices are colors and edg
 
 ![img](images/J-color.png "J-color")
 
-
-<a id="org011bf9c"></a>
 
 # Imports/Names
 
@@ -35,8 +20,6 @@ require 'viewmat'
 coinsert'jgl2 jviewmat'
 ```
 
-
-<a id="org695fdb9"></a>
 
 # Parent Form and State
 
@@ -50,6 +33,8 @@ Program state is stored in a global variable `COLOR`, initially \(0 0 0\). A han
 
 ```j
 COLOR=: 0 0 0
+HISTORY=: ,:0 0 0
+HISTSIZE=: 10
 
 rgbw_form=: noun define
 pc rgbw; pn "J-color";
@@ -71,14 +56,10 @@ rgbw_close=: monad : 'wd''psel rgbw;pclose;'''
 ```
 
 
-<a id="org9542a32"></a>
-
 # Children
 
 Event handlers can be added for children forms under the naming scheme `parentid_childid_eventid`. Here, the parent is `rbgw` and all even handlers are named `rgbw_somechild_someevent`.
 
-
-<a id="orgfadf7ba"></a>
 
 ## isidraw
 
@@ -96,6 +77,7 @@ rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
 
 adjust_color=: adverb define
 COLOR=:(3#0)>.((1{".sysdata)(m})COLOR)<.3#255
+HISTORY=: HISTSIZE {. COLOR , HISTORY
 update''
 )
 ```
@@ -104,8 +86,6 @@ update''
 
 This value is clamped between 0 and 255 in case the mouse was dragged out of bounds. Worth remembering is `sysdata` (for `isidraw`) indicates `x` then `y` coordinates and `1 { ".sysdata` does will give height to use to pick color.
 
-
-<a id="org111c736"></a>
 
 ### isidrawing
 
@@ -131,8 +111,6 @@ glpaint''
 ```
 
 
-<a id="orgcb3cc97"></a>
-
 ## edit
 
 An edit area shows the current rgb value for `COLOR`. It has a regexpvaildator which on one hand feels like overkill, but on the other reduces the frequency of erros when reading the color (`". get rgbc text''`).
@@ -143,8 +121,6 @@ The event here is button which fires when `return` is pressed and updates `COLOR
 rgbw_rgbc_button=: monad : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
 ```
 
-
-<a id="orgaa07f0c"></a>
 
 ## combolist
 
@@ -166,8 +142,6 @@ hex=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF'16&(#.^:_1)
 ```
 
 
-<a id="org8c88d71"></a>
-
 # main
 
 Only runs if inside jqt (these days `wd` only works there).
@@ -181,8 +155,6 @@ else. echo 'needs qt' end.
 courir''
 ```
 
-
-<a id="orgb22fbf8"></a>
 
 # todo
 
