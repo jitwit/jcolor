@@ -1,6 +1,8 @@
-coclass'jcolor'
-require'viewmat'
+coclass 'jcolor'
+require 'viewmat'
 coinsert'jgl2 jviewmat'
+
+COLOR=: 0 0 0
 
 rgbw_form=: noun define
 pc rgbw; pn "J-color";
@@ -19,31 +21,15 @@ pshow;
 )
 
 rgbw_close=: monad : 'wd''psel rgbw;pclose;'''
+
 rgbw_pickr_mblup=: monad : '0 adjust_color'
 rgbw_pickg_mblup=: monad : '1 adjust_color'
 rgbw_pickb_mblup=: monad : '2 adjust_color'
 rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
-rgbw_rgbc_button=: monad : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
-rgbw_copyt_select=: monad define
-select. copyt
-case. 'hex' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy #'',": hex COLOR'
-case. 'rgb' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
-end. 'ok'
-)
-
-COLOR=: 0 0 0
-
-hex=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF'16&(#.^:_1)
 
 adjust_color=: adverb define
 COLOR=:(3#0)>.((1{".sysdata)(m})COLOR)<.3#255
 update''
-)
-
-render_child=: verb define
-glclear''[glsel child[wd'psel rgbw'['column child'=. y
-((i.256)&(column})&.|:(256 3$COLOR))viewmatcc(i.256 50);child
-glpaint''
 )
 
 update=: verb define
@@ -53,9 +39,26 @@ glpaint''[glfill (COLOR,255)[glclear''[glsel'showc'
 wd'set rgbc text "',(":COLOR),'"'
 )
 
-mush=: verb define
-if. IFQT do. update[wd rgbw_form[rgbw_close^:(wdisparent'rgbw')''
-else. echo 'no qt' end.
+render_child=: verb define
+glclear''[glsel child[wd'psel rgbw'['column child'=. y
+((i.256)&(column})&.|:(256 3$COLOR))viewmatcc(i.256 50);child
+glpaint''
 )
 
-mush''
+rgbw_rgbc_button=: monad : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
+
+rgbw_copyt_select=: monad define
+select. copyt
+case. 'hex' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy #'',": hex COLOR'
+case. 'rgb' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
+end. 'ok'
+)
+
+hex=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF'16&(#.^:_1)
+
+courir=: verb define
+if. IFQT do. update[wd rgbw_form[rgbw_close^:(wdisparent'rgbw')''
+else. echo 'needs qt' end.
+)
+
+courir''

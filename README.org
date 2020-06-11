@@ -1,21 +1,18 @@
-# -*- mode: org -*-
-
 #+title: J-color
 
-This is a program for a simple color picker. I don't enjoy finding
-colors to use with the standard ones that come up in a quick search
-engine search. This file also serves as some brief notes about using
-J's ~wd~ (window driver) framework for writing qt guis.
+This is a program for a simple color picker. This file also serves as
+some brief notes about using J's ~wd~ (window driver) for writing qt
+guis.
 
 * Idea
 
-To pick colors by clicking three strips representing the color in
-RGB. To have a text edit area where numbers may be entered. For
-example, to get something yellowish, you can click somewhat far down
-the red strip and somewhat far down the green strip. Have another area
-that shows the currently selected color. Clicking the output area has
-the effect of copying the RGB value to the clipboard. There's also a
-selectionlist form to ask for a hex string if that's prefereable.
+Pick colors by clicking three strips representing the color in
+RGB. Also use a text edit area to adjust colors. To get, say something
+yellowish, one can click somewhat far down the red strip and somewhat
+far down the green strip. The created color shows is displayed in a
+larger square box. Clicking this box has the effect of copying the RGB
+value to the clipboard. There's also a selectionlist form to ask for
+different color formats.
 
 This is like walking along the RGB color space where vertices are
 colors and edges point between colors that share 2/3 RGB values. The
@@ -27,9 +24,7 @@ possible colors keeping 2 the same, which I find helpful.
 
 * Imports/Names
 
-In order to avoid cluttering up the namespace, I add a ~coclass~
-declaration. ~jgl2~ (graphics driver) and ~viewmat~ are used for
-drawing.
+~jgl2~ (graphics driver) and ~viewmat~ are used for drawing.
 
 #+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
 coclass 'jcolor'
@@ -37,21 +32,24 @@ require 'viewmat'
 coinsert'jgl2 jviewmat'
 #+END_SRC
 
+#+RESULTS:
+
 * Parent Form and State
 
-It's best to head over to the [[https://code.jsoftware.com/wiki/Guides/Window_Driver][Window Driver]] guide at jsoftware.com for
-accurate and detailed information.
+See the [[https://code.jsoftware.com/wiki/Guides/Window_Driver][Window Driver]] guide at jsoftware.com for accurate and detailed
+information.
 
-In jqt, ~wd 'pc id'~ creates a parent form in which child forms may be
-added. As things stand, this includes three ~isidraw~ forms to draw
-RGB color strips, one more to show the output color/copy to
-clipboard. One ~edit~ form to see the rgb value and to edit the
-numbers. Finally a ~combolist~ to select desired output format. 
+In jqt, ~wd 'pc id'~ creates a parent form. Child may be added to
+parent forms. This color picker uses three ~isidraw~ child forms to
+draw RGB color strips and one more to show the output color/copy to
+clipboard. There's ~edit~ form to see and edit the rgb value. Lastly,
+there's a ~combolist~ to choose an output format.
 
-Here, the parent form is called ~rgbw~ for rgb window. 
+The parent form is called ~rgbw~ for rgb window.
 
-Program state is stored in a name ~COLOR~, initially 0 0 0. A handler
-for closing the window is specified with the name ~rgbw_close~.
+Program state is stored in a global variable ~COLOR~, initially $0 0
+0$. A handler for closing the window is specified with the name
+~rgbw_close~.
 
 #+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
 COLOR=: 0 0 0
@@ -77,10 +75,9 @@ rgbw_close=: monad : 'wd''psel rgbw;pclose;'''
 
 * Children
 
-The thing to know is that event handlers can be added for children
-forms under the naming scheme ~parentid_childid_eventid~. Here, the
-parent is ~rbgw~ and all even handlers are named
-~rgbw_somechild_someevent~.
+Event handlers can be added for children forms under the naming scheme
+~parentid_childid_eventid~. Here, the parent is ~rbgw~ and all even
+handlers are named ~rgbw_somechild_someevent~.
 
 ** isidraw
 
@@ -92,7 +89,7 @@ set the color to 0, clicking the bottom will set it to 255.
 The output ~isidraw~ is called ~showc~ and clicking it will save the
 color in the clipboard.
 
-The event used is on ~mblup~ (left mouse button up). When this happens
+The event used is ~mblup~ (left mouse button up). When this happens
 the location of the mouse up on the strips determines the next
 color. For ~showc~ no location information is needed; by default the
 string of the 3-vector ~COLOR~ is formatted then copied.
@@ -114,9 +111,9 @@ update''
 blue. 
 
 This value is clamped between 0 and 255 in case the mouse was dragged
-out of bounds. Noteworthy is ~sysdata~ (for ~isidraw~) indicates ~x~
-then ~y~ coordinates, but the height of the strip is all that matters
-here, thus ~1 { ".sysdata~ does the trick.
+out of bounds. Worth remembering is ~sysdata~ (for ~isidraw~)
+indicates ~x~ then ~y~ coordinates and ~1 { ".sysdata~ does will give
+height to use to pick color.
 
 *** isidrawing
 
@@ -186,17 +183,15 @@ hex=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF'16&(#.^:_1)
 
 * main
 
-Here nicknamed ~mush~, which refuses run unless inside jqt (for ~wd~
-and to type in emacs error-free). Kills any parent windows named
-~rgbw~ for development ease then renders initial black ~COLOR~.
+Only runs if inside jqt (these days ~wd~ only works there).
 
 #+BEGIN_SRC j :session :exports code :tangle jcolor.ijs
-mush=: verb define
+courir=: verb define
 if. IFQT do. update[wd rgbw_form[rgbw_close^:(wdisparent'rgbw')''
-else. echo 'no qt' end.
+else. echo 'needs qt' end.
 )
 
-mush''
+courir''
 #+END_SRC
 
 * todo
