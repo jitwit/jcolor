@@ -75,7 +75,7 @@ COLOR=: ". histt
 update''
 )
 
-hex=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF'16&(#.^:_1)
+hex=: [: , ": @ '0123456789ABCDEF' {~ 16 16&#:
 
 courir=: 3 : 0
 if. IFQT do. update[wd rgbw_form[rgbw_close^:(wdisparent'rgbw')''
