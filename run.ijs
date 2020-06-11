@@ -1,2 +1,1 @@
-load'jcolor.ijs'
-courir_jcolor_''
+load'~/code/jcolor/jcolor.ijs'

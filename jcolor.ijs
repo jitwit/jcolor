@@ -77,3 +77,5 @@ courir=: 3 : 0
 if. IFQT do. update[wd rgbw_form[rgbw_close^:(wdisparent'rgbw')''
 else. echo 'needs qt' end.
 )
+
+courir''
