@@ -222,3 +222,21 @@ courir''
 
 Polish up to put in jqt program menu jqt and make distributable as an
 addon.
+
+* addon
+
+I'll definitely forget these details. OK, so J distributes packages as
+addons. These are mostly managed through ~pacman~. The structure of
+these packages is laid out in the [[file:manifest.ijs][manifest]] wherein we specify:
++ *CAPTION* brief about
++ *DESCRIPTION* more about
++ *VERSION*
++ *DEPENDS* we depend on gl2 and viewmat
++ *FILES* It's just [[file:jcolor.ijs][jcolor.ijs]] and [[file:run.ijs][run.ijs]] who loads ~jcolor.ijs~.
++ *RELEASE* I put j901 since that's what I used.
++ *FOLDER* Can be an existing one or is based on github user. I
+  avoided indulging in too much hubris by naming this something
+  generic and scoped it to me.
+
+Having defined run.ijs, I am able to type ~[f9]~ in jqt to start
+things, which is fun.

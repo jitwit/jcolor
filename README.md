@@ -36,7 +36,7 @@ COLOR=: 0 0 0
 HISTORY=: ,:0 0 0
 HISTSIZE=: 10
 
-rgbw_form=: noun define
+rgbw_form=: 0 : 0
 pc rgbw; pn "J-color";
 bin h;
   cc pickr isidraw; set pickr wh 50 256;
@@ -53,7 +53,10 @@ bin z;
 pshow;
 )
 
-rgbw_close=: monad : 'wd''psel rgbw;pclose;'''
+rgbw_close=: 3 : 0
+wd'psel rgbw;pclose;'
+wd 'clipcopy ',": COLOR
+)
 ```
 
 
@@ -71,10 +74,10 @@ The output `isidraw` is called `showc` and clicking it will save the color in th
 The event used is `mblup` (left mouse button up). When this happens the location of the mouse up on the strips determines the next color. For `showc` no location information is needed; by default the string of the 3-vector `COLOR` is formatted then copied.
 
 ```j
-rgbw_pickr_mblup=: monad : '0 adjust_color'
-rgbw_pickg_mblup=: monad : '1 adjust_color'
-rgbw_pickb_mblup=: monad : '2 adjust_color'
-rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
+rgbw_pickr_mblup=: 3 : '0 adjust_color'
+rgbw_pickg_mblup=: 3 : '1 adjust_color'
+rgbw_pickb_mblup=: 3 : '2 adjust_color'
+rgbw_showc_mblup=: 3 : 'wd ''clipcopy '',": COLOR'
 
 record_hist=: 3 : 0
 HISTORY=: ~. (<./HISTSIZE,>:#HISTORY) {. COLOR , HISTORY
@@ -83,7 +86,6 @@ wd 'set histt items',,/(' ','"'&,@,&'"'@":)"1 HISTORY
 
 adjust_color=: 1 : 0
 COLOR=:(3#0)>.((1{".sysdata)(m})COLOR)<.3#255
-record_hist''
 update''
 )
 ```
@@ -102,14 +104,15 @@ For example, take green. The main work is done with `((i.256)&(1})&.|:(256 3$COL
 The color palette used by `viewmatcc` is constant `COLOR` with 1st row (green) ammended to with values 0 to 255. The 256 by 50 matrix that gets drawn can then be (`i.256 50`) with the appropriate rgb color going at each row.
 
 ```j
-update=: verb define
+update=: 3 : 0
+record_hist''
 wd'psel rgbw'
 render_child(2;'pickb')[render_child(1;'pickg')[render_child(0;'pickr')
 glpaint''[glfill (COLOR,255)[glclear''[glsel'showc'
 wd'set rgbc text "',(":COLOR),'"'
 )
 
-render_child=: verb define
+render_child=: 3 : 0
 glclear''[glsel child[wd'psel rgbw'['column child'=. y
 ((i.256)&(column})&.|:(256 3$COLOR))viewmatcc(i.256 50);child
 glpaint''
@@ -124,7 +127,7 @@ An edit area shows the current rgb value for `COLOR`. It has a regexpvaildator w
 The event here is button which fires when `return` is pressed and updates `COLOR` to the new value. All drawings subsequently updated.
 
 ```j
-rgbw_rgbc_button=: monad : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
+rgbw_rgbc_button=: 3 : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
 ```
 
 
@@ -137,16 +140,15 @@ It works by modifying the definition of the event handler for `showc_mblup`.
 `hex` works by antibasing (`#.^:_1`) in base 16, selecting into string `01234567890ABCDEF`, padding with `0` (in case of very dark colors to ensure 6 characters in output), taking last two columns, then finally raveling.
 
 ```j
-rgbw_copyt_select=: monad define
+rgbw_copyt_select=: 3 : 0
 select. copyt
-case. 'hex' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy #'',": hex COLOR'
-case. 'rgb' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
+case. 'hex' do. rgbw_showc_mblup=: 3 : 'wd ''clipcopy #'',": hex COLOR'
+case. 'rgb' do. rgbw_showc_mblup=: 3 : 'wd ''clipcopy '',": COLOR'
 end. 'ok'
 )
 
-rgbw_histt_select=: monad define
+rgbw_histt_select=: 3 : 0
 COLOR=: ". histt
-record_hist''
 update''
 )
 
@@ -159,7 +161,7 @@ hex=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF'16&(#.^:_1)
 Only runs if inside jqt (these days `wd` only works there).
 
 ```j
-courir=: verb define
+courir=: 3 : 0
 if. IFQT do. update[wd rgbw_form[rgbw_close^:(wdisparent'rgbw')''
 else. echo 'needs qt' end.
 )
@@ -171,3 +173,18 @@ courir''
 # todo
 
 Polish up to put in jqt program menu jqt and make distributable as an addon.
+
+
+# addon
+
+I'll definitely forget these details. OK, so J distributes packages as addons. These are mostly managed through `pacman`. The structure of these packages is laid out in the [manifest](manifest.ijs) wherein we specify:
+
+-   **CAPTION** brief about
+-   **DESCRIPTION** more about
+-   **VERSION**
+-   **DEPENDS** we depend on gl2 and viewmat
+-   **FILES** It's just [jcolor.ijs](jcolor.ijs) and [run.ijs](run.ijs) who loads `jcolor.ijs`.
+-   **RELEASE** I put j901 since that's what I used.
+-   **FOLDER** Can be an existing one or is based on github user. I avoided indulging in too much hubris by naming this something generic and scoped it to me.
+
+Having defined run.ijs, I am able to type `[f9]` in jqt to start things, which is fun.
