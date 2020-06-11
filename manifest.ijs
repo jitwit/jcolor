@@ -8,7 +8,7 @@ J Color Picker
 see https://github.com/jitwit/jcolor
 )
 
-VERSION=: '0.0.1'
+VERSION=: '0.0.2'
 
 DEPENDS=: 0 : 0
 viewmat

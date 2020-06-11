@@ -24,14 +24,18 @@ pshow;
 )
 
 rgbw_close=: 3 : 0
-wd'psel rgbw;pclose;'
+grab_color wd'psel rgbw;pclose;'
+)
+
+grab_color=: 3 : 0
 wd 'clipcopy ',": COLOR
 )
 
 rgbw_pickr_mblup=: 3 : '0 adjust_color'
 rgbw_pickg_mblup=: 3 : '1 adjust_color'
 rgbw_pickb_mblup=: 3 : '2 adjust_color'
-rgbw_showc_mblup=: 3 : 'wd ''clipcopy '',": COLOR'
+rgbw_showc_mblup=: grab_color
+
 
 record_hist=: 3 : 0
 HISTORY=: ~. (<./HISTSIZE,>:#HISTORY) {. COLOR , HISTORY
@@ -61,8 +65,8 @@ rgbw_rgbc_button=: 3 : 'update[COLOR=: (3#0)>.(".wd''get rgbc text'')<.3#255'
 
 rgbw_copyt_select=: 3 : 0
 select. copyt
-case. 'hex' do. rgbw_showc_mblup=: 3 : 'wd ''clipcopy #'',": hex COLOR'
-case. 'rgb' do. rgbw_showc_mblup=: 3 : 'wd ''clipcopy '',": COLOR'
+case. 'hex' do. grab_color=: 3 : 'wd ''clipcopy #'',": hex COLOR'
+case. 'rgb' do. grab_color=: 3 : 'wd ''clipcopy '',": COLOR'
 end. 'ok'
 )
 
