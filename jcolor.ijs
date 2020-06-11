@@ -3,6 +3,8 @@ require 'viewmat'
 coinsert'jgl2 jviewmat'
 
 COLOR=: 0 0 0
+HISTORY=: ,:0 0 0
+HISTSIZE=: 10
 
 rgbw_form=: noun define
 pc rgbw; pn "J-color";
@@ -15,6 +17,7 @@ bin h;
     cc rgbc edit; set rgbc wh 180 25; set rgbc alignment center;
       set rgbc regexpvalidator \d{,3}(\s\d{,3}){2,2};
     cc copyt combolist; set copyt items rgb hex;
+    cc histt combolist; set histt items "0 0 0";
   bin z;
 bin z;
 pshow;
@@ -27,8 +30,14 @@ rgbw_pickg_mblup=: monad : '1 adjust_color'
 rgbw_pickb_mblup=: monad : '2 adjust_color'
 rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
 
-adjust_color=: adverb define
+record_hist=: 3 : 0
+HISTORY=: ~. (<./HISTSIZE,>:#HISTORY) {. COLOR , HISTORY
+wd 'set histt items',,/(' ','"'&,@,&'"'@":)"1 HISTORY
+)
+
+adjust_color=: 1 : 0
 COLOR=:(3#0)>.((1{".sysdata)(m})COLOR)<.3#255
+record_hist''
 update''
 )
 
@@ -52,6 +61,12 @@ select. copyt
 case. 'hex' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy #'',": hex COLOR'
 case. 'rgb' do. rgbw_showc_mblup=: monad : 'wd ''clipcopy '',": COLOR'
 end. 'ok'
+)
+
+rgbw_histt_select=: monad define
+COLOR=: ". histt
+record_hist''
+update''
 )
 
 hex=: [:,[:_2&{."1[:'000'&,.[:":[:{&'0123456789ABCDEF'16&(#.^:_1)
